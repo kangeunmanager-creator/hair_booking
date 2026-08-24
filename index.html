@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>헤어변형 출장 예약문의</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+    background: linear-gradient(135deg, #faf5ff 0%, #fdf2f8 50%, #fff1f2 100%);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .header {
+    max-width: 640px;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #9333ea, #db2777);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .header h1 { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #9333ea, #db2777); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .header p { font-size: 12px; color: #6b7280; }
+
+  .card {
+    max-width: 640px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    padding: 32px 24px;
+  }
+
+  .steps { display: flex; justify-content: center; margin-bottom: 32px; }
+  .step-dot { width: 32px; height: 32px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; background:#e5e7eb; color:#6b7280; }
+  .step-dot.active { background: #9333ea; color: white; }
+  .step-line { width: 32px; height: 4px; background: #e5e7eb; }
+  .step-line.active { background: #9333ea; }
+
+  h2 { font-size: 24px; font-weight: 800; margin-bottom: 16px; display:flex; align-items:center; gap:8px; }
+  .hint { font-size: 12px; color: #6b7280; margin-bottom: 16px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  label { display:block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  input, select {
+    width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px;
+    font-size: 15px; outline: none; background: white;
+  }
+  input:focus, select:focus { border-color: #9333ea; }
+
+  .opt-btn-group { display: grid; gap: 12px; margin-bottom: 16px; }
+  .opt-btn-group.two { grid-template-columns: 1fr 1fr; }
+  .opt-btn {
+    padding: 16px; border-radius: 12px; border: 2px solid #e5e7eb;
+    font-weight: 700; font-size: 16px; cursor: pointer; background: white; transition: 0.15s;
+  }
+  .opt-btn.selected { border-color: #9333ea; background: #faf5ff; color: #7e22ce; }
+  .opt-btn:hover { border-color: #c084fc; }
+
+  .time-select { display: flex; align-items: center; gap: 8px; }
+  .time-select select { flex: 1; }
+
+  .btn-row { display: flex; gap: 12px; margin-top: 24px; }
+  .btn {
+    flex: 1; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 16px;
+    border: none; cursor: pointer; transition: 0.15s;
+  }
+  .btn-primary { background: linear-gradient(135deg, #9333ea, #db2777); color: white; }
+  .btn-primary:disabled { background: #d1d5db; cursor: not-allowed; }
+  .btn-outline { background: white; border: 2px solid #d1d5db; color: #374151; }
+
+  .summary-box { background: #faf5ff; border-radius: 12px; padding: 20px; margin-bottom: 20px; font-size: 14px; line-height: 2; }
+
+  .result-card { border-radius: 12px; padding: 16px; border: 2px solid #e5e7eb; display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .result-card.ok { border-color: #86efac; background: #f0fdf4; }
+  .result-card.check { border-color: #fcd34d; background: #fffbeb; }
+  .result-card.no { border-color: #fecaca; background: #fef2f2; }
+  .result-left { display:flex; align-items:center; gap:12px; }
+  .status-icon { width: 40px; height: 40px; border-radius: 50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:18px; }
+  .status-icon.ok { background: #22c55e; }
+  .status-icon.check { background: #f59e0b; }
+  .status-icon.no { background: #ef4444; }
+  .staff-name { font-weight: 700; }
+  .staff-status { font-size: 12px; color: #6b7280; }
+
+  .error-box { background: #fef2f2; border: 2px solid #fecaca; color: #b91c1c; border-radius: 12px; padding: 14px; font-size: 14px; margin-bottom: 16px; }
+  .fee-box { background: #eff6ff; border-radius: 12px; padding: 14px; font-size: 14px; color: #1e40af; margin-top: 12px; }
+  .loading { text-align: center; padding: 20px; color: #6b7280; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">💇</div>
+  <div>
+    <h1>헤어변형 출장 예약문의</h1>
+    <p>강은·재열·민영·희지 실시간 확인 (독립 실행 버전)</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="steps" id="stepsIndicator"></div>
+  <div id="content"></div>
+</div>
+
+<script>
+// ⚠️ Apps Script 웹 앱 배포 URL
+const API_URL = 'https://script.google.com/macros/s/AKfycbxAac9U1Z5E6MZ1OFghfLe-IJ74l3_ao2LrwbdvUC_aZs2mv9otTYasS_R0CsTJ5v7R/exec';
+
+const STAFF_DISPLAY = { '강은':'강은 대표원장','재열':'재열 부원장','민영':'민영 실장','희지':'희지 실장' };
+const HOURS = Array.from({length:13}, (_,i)=>String(i+9).padStart(2,'0'));
+const MINUTES = ['00','30'];
+const SERVICE_TO_API = { '촬영':'촬영', '본식2부':'2부' };
+
+let state = {
+  step: 1,
+  inquiryType: '',
+  serviceType: '',
+  form: { name:'', phone:'', plannerCompany:'', plannerName:'', date:'', startTime:'', durationHour:'', ceremonyTime:'', place:'' },
+  result: null,
+  error: '',
+  loading: false
+};
+
+function updateForm(key, val){ state.form[key] = val; render(); }
+function resetAll(){
+  state = { step:1, inquiryType:'', serviceType:'', form:{ name:'', phone:'', plannerCompany:'', plannerName:'', date:'', startTime:'', durationHour:'', ceremonyTime:'', place:'' }, result:null, error:'', loading:false };
+  render();
+}
+
+function timeSelectHtml(id, value){
+  const [h,m] = value ? value.split(':') : ['',''];
+  return `
+    <div class="time-select">
+      <select onchange="onTimeHour('${id}', this.value)">
+        <option value="">시</option>
+        ${HOURS.map(hh=>`<option value="${hh}" ${h===hh?'selected':''}>${hh}시</option>`).join('')}
+      </select>
+      <span>:</span>
+      <select onchange="onTimeMin('${id}', this.value)">
+        <option value="">분</option>
+        ${MINUTES.map(mm=>`<option value="${mm}" ${m===mm?'selected':''}>${mm}분</option>`).join('')}
+      </select>
+    </div>`;
+}
+function onTimeHour(id, h){
+  const cur = state.form[id] || '';
+  const m = cur.split(':')[1] || '00';
+  updateForm(id, `${h}:${m}`);
+}
+function onTimeMin(id, m){
+  const cur = state.form[id] || '';
+  const h = cur.split(':')[0] || '09';
+  updateForm(id, `${h}:${m}`);
+}
+
+function setInquiryType(t){ state.inquiryType = t; render(); }
+function setServiceType(t){ state.serviceType = t; render(); }
+function goStep(n){ state.step = n; render(); }
+
+function canSubmit(){
+  const f = state.form;
+  if(!state.inquiryType || !state.serviceType || !f.date || !f.place) return false;
+  if(state.inquiryType === '신랑/신부' && (!f.name || !f.phone)) return false;
+  if(state.inquiryType === '플래너' && (!f.plannerCompany || !f.plannerName)) return false;
+  if(state.serviceType === '촬영' && (!f.startTime || !f.durationHour)) return false;
+  if(state.serviceType === '본식2부' && !f.ceremonyTime) return false;
+  return true;
+}
+
+async function handleCheck(){
+  if(!canSubmit()){ state.error = '필수 항목을 모두 입력해주세요.'; render(); return; }
+  state.error = ''; state.loading = true; state.result = null; render();
+
+  try {
+    const apiServiceType = SERVICE_TO_API[state.serviceType];
+    const params = new URLSearchParams({
+      action: 'checkAvailability',
+      inquiryType: state.inquiryType,
+      name: state.form.name,
+      phone: state.form.phone,
+      serviceType: apiServiceType,
+      date: state.form.date,
+      place: state.form.place
+    });
+    if(state.serviceType === '촬영'){
+      params.set('startTime', state.form.startTime);
+      params.set('durationMin', String(Number(state.form.durationHour)*60));
+    } else {
+      params.set('ceremonyTime', state.form.ceremonyTime);
+    }
+
+    const res = await fetch(`${API_URL}?${params.toString()}`);
+    const data = await res.json();
+
+    if(!data.success){
+      state.error = data.error || '조회 중 오류가 발생했습니다.';
+    } else {
+      state.result = data;
+    }
+  } catch(err){
+    state.error = '서버 연결에 실패했습니다: ' + err.message;
+  } finally {
+    state.loading = false;
+    render();
+  }
+}
+
+function render(){
+  document.getElementById('stepsIndicator').innerHTML = [1,2,3,4].map(s => `
+    <div style="display:flex;align-items:center;">
+      <div class="step-dot ${state.step>=s?'active':''}">${s}</div>
+      ${s<4 ? `<div class="step-line ${state.step>s?'active':''}"></div>` : ''}
+    </div>
+  `).join('');
+
+  const c = document.getElementById('content');
+  const f = state.form;
+
+  if(state.step === 1){
+    c.innerHTML = `
+      <h2>👥 문의 유형을 선택해주세요</h2>
+      <div class="opt-btn-group two">
+        <button class="opt-btn ${state.inquiryType==='신랑/신부'?'selected':''}" onclick="setInquiryType('신랑/신부')">신랑/신부</button>
+        <button class="opt-btn ${state.inquiryType==='플래너'?'selected':''}" onclick="setInquiryType('플래너')">플래너</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" ${!state.inquiryType?'disabled':''} onclick="goStep(2)">다음</button>
+      </div>`;
+    return;
+  }
+
+  if(state.step === 2){
+    let timeBlock = '';
+    if(state.serviceType === '촬영'){
+      timeBlock = `
+        <div class="grid2">
+          <div><label>시작 시간</label>${timeSelectHtml('startTime', f.startTime)}</div>
+          <div><label>진행 시간</label>
+            <select onchange="updateForm('durationHour', this.value)">
+              <option value="">선택</option>
+              ${[1,2,3,4,5,6,7,8].map(h=>`<option value="${h}" ${f.durationHour==h?'selected':''}>${h}시간</option>`).join('')}
+            </select>
+          </div>
+        </div>`;
+    } else if(state.serviceType === '본식2부'){
+      timeBlock = `
+        <div>
+          <label>예식 시작 시간</label>
+          ${timeSelectHtml('ceremonyTime', f.ceremonyTime)}
+          <p class="hint" style="margin-top:8px;">* 2부 헤어변형 작업시간은 예식시간+30분부터 1시간으로 자동 계산됩니다</p>
+        </div>`;
+    }
+
+    c.innerHTML = `
+      <h2>⏰ 서비스 종류 및 시간</h2>
+      <p class="hint">* 예약 가능 시간: 오전 9시 ~ 오후 9시 (30분 단위)</p>
+      <div class="opt-btn-group two">
+        <button class="opt-btn ${state.serviceType==='촬영'?'selected':''}" onclick="setServiceType('촬영')">촬영</button>
+        <button class="opt-btn ${state.serviceType==='본식2부'?'selected':''}" onclick="setServiceType('본식2부')">본식2부</button>
+      </div>
+      ${timeBlock}
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goStep(1)">이전</button>
+        <button class="btn btn-primary" onclick="tryStep3()">다음</button>
+      </div>`;
+    return;
+  }
+
+  if(state.step === 3){
+    const nameBlock = state.inquiryType === '신랑/신부' ? `
+      <div class="grid2">
+        <div><label>신부 이름</label><input type="text" value="${f.name}" oninput="updateForm('name', this.value)" placeholder="홍길동"></div>
+        <div><label>연락처</label><input type="tel" value="${f.phone}" oninput="updateForm('phone', this.value)" placeholder="010-0000-0000"></div>
+      </div>` : `
+      <div class="grid2">
+        <div><label>업체명</label><input type="text" value="${f.plannerCompany}" oninput="updateForm('plannerCompany', this.value)" placeholder="예: 이유플랜"></div>
+        <div><label>담당자명</label><input type="text" value="${f.plannerName}" oninput="updateForm('plannerName', this.value)" placeholder="담당 플래너 이름"></div>
+      </div>`;
+
+    c.innerHTML = `
+      <h2>📍 날짜 · 장소 · 연락처</h2>
+      <div style="margin-bottom:16px;">
+        <label>희망 날짜</label>
+        <input type="date" value="${f.date}" min="${new Date().toISOString().split('T')[0]}" oninput="updateForm('date', this.value)">
+      </div>
+      <div style="margin-bottom:16px;">
+        <label>스튜디오 / 예식장명</label>
+        <input type="text" value="${f.place}" oninput="updateForm('place', this.value)" placeholder="예: 베리굿, 신라호텔">
+      </div>
+      ${nameBlock}
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goStep(2)">이전</button>
+        <button class="btn btn-primary" onclick="tryStep4()">다음</button>
+      </div>`;
+    return;
+  }
+
+  if(state.step === 4){
+    let resultHtml = '';
+    if(state.result && state.result.raw){
+      const raw = state.result.raw;
+      if(raw.type === 'HIGH_FEE'){
+        resultHtml = `<div class="error-box" style="background:#fffbeb;border-color:#fcd34d;color:#92400e;">⚠️ 상담원 확인 필요<br>${raw.message}</div>`;
+      } else {
+        const cards = Object.entries(raw.results).map(([staff, r]) => {
+          const cls = r.status==='O'?'ok':(r.status==='CHECK'?'check':'no');
+          const icon = r.status==='O'?'✓':(r.status==='CHECK'?'!':'✕');
+          const desc = r.status==='O' ? '예약 가능' : (r.status==='X' ? (r.reason||'예약 불가') : `확인 필요 (대안: ${r.alternativeTime})`);
+          return `
+            <div class="result-card ${cls}">
+              <div class="result-left">
+                <div class="status-icon ${cls}">${icon}</div>
+                <div><div class="staff-name">${STAFF_DISPLAY[staff]}</div><div class="staff-status">${desc}</div></div>
+              </div>
+            </div>`;
+        }).join('');
+        resultHtml = `
+          <div style="background:#f9fafb;border:2px solid #e5e7eb;border-radius:12px;padding:20px;">
+            <h3 style="margin-bottom:12px;">담당자별 예약 가능 여부</h3>
+            ${cards}
+          </div>
+          <div class="fee-box">출장비 안내: <strong>${raw.feeMessage}</strong></div>`;
+      }
+      resultHtml += `
+        <p style="text-align:center;font-size:13px;color:#6b7280;margin-top:16px;">문의 내용이 자동으로 접수되었습니다. 담당자가 곧 연락드립니다.</p>
+        <div class="btn-row"><button class="btn btn-outline" onclick="resetAll()">새 문의 작성하기</button></div>`;
+    }
+
+    c.innerHTML = `
+      <h2>문의 내용 확인</h2>
+      <div class="summary-box">
+        <div><strong>문의유형:</strong> ${state.inquiryType}</div>
+        <div><strong>서비스:</strong> ${state.serviceType==='본식2부'?'본식2부 헤어변형':'촬영 헤어변형'}</div>
+        <div><strong>날짜:</strong> ${f.date}</div>
+        <div><strong>시간:</strong> ${state.serviceType==='촬영' ? `${f.startTime}부터 ${f.durationHour}시간` : `예식 ${f.ceremonyTime}`}</div>
+        <div><strong>장소:</strong> ${f.place}</div>
+        <div><strong>${state.inquiryType==='플래너'?'업체/담당자':'신부명/연락처'}:</strong> ${f.name} ${state.inquiryType!=='플래너'?f.phone:''}</div>
+      </div>
+      ${state.error ? `<div class="error-box">⚠️ ${state.error}</div>` : ''}
+      ${!state.result && !state.loading ? `<div class="btn-row"><button class="btn btn-primary" onclick="handleCheck()">예약 가능 여부 확인하기</button></div>` : ''}
+      ${state.loading ? `<div class="loading">확인 중...</div>` : ''}
+      ${resultHtml}
+      ${!state.result ? `<div class="btn-row"><button class="btn btn-outline" onclick="goStep(3)">이전으로</button></div>` : ''}
+    `;
+    return;
+  }
+}
+
+function tryStep3(){
+  if(!state.serviceType) return;
+  if(state.serviceType==='촬영' && (!state.form.startTime || !state.form.durationHour)) return;
+  if(state.serviceType==='본식2부' && !state.form.ceremonyTime) return;
+  goStep(3);
+}
+function tryStep4(){
+  const f = state.form;
+  if(state.inquiryType==='플래너'){
+    f.name = `${f.plannerCompany} ${f.plannerName}`;
+    f.phone = '-';
+  }
+  if(f.date && f.place &&
+    ((state.inquiryType==='신랑/신부' && f.name && f.phone) ||
+     (state.inquiryType==='플래너' && f.plannerCompany && f.plannerName))){
+    goStep(4);
+  }
+}
+
+render();
+</script>
+</body>
+</html>
