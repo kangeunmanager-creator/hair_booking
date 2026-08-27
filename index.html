@@ -794,7 +794,7 @@ function computeEndMinutes(){
 function isLateCharge(){
   const end = computeEndMinutes();
   if(end === null) return false;
-  return end > (20*60 + 30); // 20:30 이후 종료면 해당
+  return end >= (20*60 + 30); // 20:30 정각 포함, 그 이후 종료면 해당
 }
 
 function tryStep3(){
