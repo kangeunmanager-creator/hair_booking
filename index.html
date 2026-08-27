@@ -750,6 +750,7 @@ function render(){
           <button class="btn btn-outline" onclick="resetAll()">다른 스케줄 조회</button>
           <button class="btn btn-primary" onclick="copyAndOpenKakao()">해당 스케줄 예약·상담하기</button>
         </div>
+        <p class="note-line">채팅창이 열리면 조회결과를 붙여넣기해주세요</p>
         ${state.clipboardCopied ? `<p class="note-line" style="color:var(--ok);font-weight:700;">✓ 클립보드에 문의내역이 복사되었습니다</p>` : ''}`;
     }
 
