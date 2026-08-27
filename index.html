@@ -651,7 +651,7 @@ function render(){
           <div><label>진행 시간</label>
             <select onchange="updateFormAndRender('durationHour', this.value)">
               <option value="">선택</option>
-              ${[2,3,4,5,6,7,8].map(h=>`<option value="${h}" ${f.durationHour==h?'selected':''}>${h}시간</option>`).join('')}
+              ${[2,3,4,5,6].map(h=>`<option value="${h}" ${f.durationHour==h?'selected':''}>${h}시간</option>`).join('')}
             </select>
           </div>
         </div>`;
