@@ -533,7 +533,7 @@ function buildInquirySummaryText(){
       lines.push(`상담원 확인 필요: ${raw.message}`);
     } else {
       Object.entries(raw.results).forEach(([staff, r]) => {
-        const desc = r.status==='O' ? '예약 가능' : (r.status==='X' ? (r.reason||'예약 불가') : `확인 필요 (대안: ${r.alternativeTime})`);
+        const desc = r.status==='O' ? '가능' : (r.status==='X' ? (r.reason||'불가') : `확인 필요 (대안: ${r.alternativeTime})`);
         lines.push(`- ${STAFF_DISPLAY[staff]}: ${desc}`);
       });
       lines.push(`출장비 안내: ${raw.feeMessage}`);
@@ -723,7 +723,7 @@ function render(){
         const cards = Object.entries(raw.results).map(([staff, r]) => {
           const cls = r.status==='O'?'ok':(r.status==='CHECK'?'check':'no');
           const icon = r.status==='O'?'✓':(r.status==='CHECK'?'!':'✕');
-          const desc = r.status==='O' ? '예약 가능' : (r.status==='X' ? (r.reason||'예약 불가') : `확인 필요 (대안: ${r.alternativeTime})`);
+          const desc = r.status==='O' ? '가능' : (r.status==='X' ? (r.reason||'불가') : `확인 필요 (대안: ${r.alternativeTime})`);
           return `
             <div class="result-card ${cls}">
               <div class="result-left">
@@ -745,7 +745,6 @@ function render(){
           ${lateChargeHtml}`;
       }
       resultHtml += `
-        <p class="note-line">아래 버튼으로 조회 내용과 결과를 복사해 카카오채널로 바로 상담하실 수 있습니다.</p>
         <div class="btn-row">
           <button class="btn btn-outline" onclick="resetAll()">다른 스케줄 조회</button>
           <button class="btn btn-primary" onclick="copyAndOpenKakao()">해당 스케줄 예약·상담하기</button>
